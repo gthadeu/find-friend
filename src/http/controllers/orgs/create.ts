@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/prisma";
+import { createOrgService } from "@/services/create-org";
+import { OrgAlreadyExistsError } from "@/services/errors/orgs-already-exists";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 
@@ -37,8 +38,8 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
     password,
   } = registerBodySchema.parse(request.body);
 
-  await prisma.org.create({
-    data: {
+  try {
+    await createOrgService({
       name,
       author_name,
       cep,
@@ -51,8 +52,14 @@ export async function create(request: FastifyRequest, reply: FastifyReply) {
       latitude,
       longitude,
       password,
-    },
-  });
+    });
+  } catch (error) {
+    if (error instanceof OrgAlreadyExistsError) {
+      return reply.status(409).send({
+        message: error.message,
+      });
+    }
+  }
 
   return reply.status(201).send();
 }
