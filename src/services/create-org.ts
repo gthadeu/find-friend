@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { PrismaOrgsRepository } from "@/repositories/prisma-orgs-repository";
 import { hash } from "bcryptjs";
 import { OrgAlreadyExistsError } from "./errors/orgs-already-exists";
 
@@ -43,20 +44,20 @@ export async function createOrgService({
     throw new OrgAlreadyExistsError();
   }
 
-  await prisma.org.create({
-    data: {
-      name,
-      author_name,
-      cep,
-      email,
-      whatsapp,
-      state,
-      city,
-      neighborhood,
-      street,
-      latitude,
-      longitude,
-      password: password_hash,
-    },
+  const prismaOrgsRepository = new PrismaOrgsRepository();
+
+  prismaOrgsRepository.create({
+    name,
+    author_name,
+    cep,
+    email,
+    whatsapp,
+    state,
+    city,
+    neighborhood,
+    street,
+    latitude,
+    longitude,
+    password: password_hash,
   });
 }
